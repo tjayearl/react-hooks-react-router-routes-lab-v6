@@ -1,70 +1,94 @@
 // src/__tests__/NavBar.test.jsx
 import "@testing-library/jest-dom";
-// React import is not needed for testing-library tests unless using React APIs directly
-import { fireEvent, render, screen } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { render, screen } from "@testing-library/react";
+// Import MemoryRouter to control the current route for testing NavLink active state
+import { MemoryRouter } from "react-router-dom";
 import NavBar from "../components/NavBar";
-import { beforeEach, expect, test } from "vitest";
+import { expect, test } from "vitest";
 
-let container;
-
-beforeEach(() => {
-  // Render the component within BrowserRouter for NavLink context
-  // Store the container for querying the DOM structure if needed
-  container = render(
-    <BrowserRouter>
+test('wraps content in a div with "navbar" class and role="navigation"', () => {
+  // Render within MemoryRouter as NavBar contains NavLinks
+  render(
+    <MemoryRouter>
       <NavBar />
-    </BrowserRouter>
-  ).container;
+    </MemoryRouter>
+  );
+  // Check using the semantic role 'navigation'
+  const navElement = screen.getByRole('navigation');
+  expect(navElement).toBeInTheDocument();
+  expect(navElement).toHaveClass('navbar');
+  // Ensure it's a div (or appropriate element based on NavBar implementation)
+  expect(navElement.tagName).toBe('DIV'); // Or NAV, etc. depending on NavBar.jsx
 });
 
-test('wraps content in a div with "navbar" class', () => {
-  // Use container.querySelector for specific DOM structure checks
-  expect(container.querySelector(".navbar")).toBeInTheDocument();
-  // Or check if the element with the role 'navigation' exists (semantically better)
-  expect(screen.getByRole('navigation')).toHaveClass('navbar');
-});
+test("renders NavLinks with correct href attributes", () => {
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>
+  );
 
-test("renders a Home <NavLink> and checks active state on click", async () => {
-  // Use screen.getByRole for accessibility and user-centric testing
   const homeLink = screen.getByRole('link', { name: /Home/i });
-
-  expect(homeLink).toBeInTheDocument();
-  expect(homeLink.tagName).toBe("A"); // NavLink renders as an <a> tag
-  expect(homeLink).toHaveAttribute('href', '/'); // Check the target URL
-
-  // Simulate user clicking the link
-  fireEvent.click(homeLink);
-
-  // Check if the 'active' class is applied after click (default NavLink behavior)
-  // Note: In a real app, the route would change, triggering the active state.
-  // BrowserRouter here doesn't change routes, so this tests the immediate class application
-  // if NavLink applies it directly, or might need more setup for route-based active state.
-  // For basic rendering and click simulation, this is okay.
-  // If testing *actual* route change effect on 'active' class, need RouterProvider/MemoryRouter setup.
-  expect(homeLink).toHaveClass("active");
-});
-
-test("renders an Actors <NavLink> and checks active state on click", async () => {
   const actorsLink = screen.getByRole('link', { name: /Actors/i });
-
-  expect(actorsLink).toBeInTheDocument();
-  expect(actorsLink.tagName).toBe("A");
-  expect(actorsLink).toHaveAttribute('href', '/actors'); // Check the target URL
-
-  fireEvent.click(actorsLink);
-
-  expect(actorsLink).toHaveClass("active");
-});
-
-test("renders a Directors <NavLink> and checks active state on click", async () => {
   const directorsLink = screen.getByRole('link', { name: /Directors/i });
 
+  expect(homeLink).toBeInTheDocument();
+  expect(homeLink).toHaveAttribute('href', '/');
+
+  expect(actorsLink).toBeInTheDocument();
+  expect(actorsLink).toHaveAttribute('href', '/actors');
+
   expect(directorsLink).toBeInTheDocument();
-  expect(directorsLink.tagName).toBe("A");
-  expect(directorsLink).toHaveAttribute('href', '/directors'); // Check the target URL
+  expect(directorsLink).toHaveAttribute('href', '/directors');
+});
 
-  fireEvent.click(directorsLink);
+test("applies 'active' class to Home NavLink when route is '/'", () => {
+  render(
+    // Set the initial route to '/'
+    <MemoryRouter initialEntries={['/']}>
+      <NavBar />
+    </MemoryRouter>
+  );
 
-  expect(directorsLink).toHaveClass("active");
+  const homeLink = screen.getByRole('link', { name: /Home/i });
+  const actorsLink = screen.getByRole('link', { name: /Actors/i });
+
+  // Home link should be active
+  expect(homeLink).toHaveClass('active');
+  // Other links should not be active
+  expect(actorsLink).not.toHaveClass('active');
+});
+
+test("applies 'active' class to Actors NavLink when route is '/actors'", () => {
+  render(
+    // Set the initial route to '/actors'
+    <MemoryRouter initialEntries={['/actors']}>
+      <NavBar />
+    </MemoryRouter>
+  );
+
+  const homeLink = screen.getByRole('link', { name: /Home/i });
+  const actorsLink = screen.getByRole('link', { name: /Actors/i });
+
+  // Actors link should be active
+  expect(actorsLink).toHaveClass('active');
+  // Other links should not be active
+  expect(homeLink).not.toHaveClass('active');
+});
+
+test("applies 'active' class to Directors NavLink when route is '/directors'", () => {
+  render(
+    // Set the initial route to '/directors'
+    <MemoryRouter initialEntries={['/directors']}>
+      <NavBar />
+    </MemoryRouter>
+  );
+
+  const homeLink = screen.getByRole('link', { name: /Home/i });
+  const directorsLink = screen.getByRole('link', { name: /Directors/i });
+
+  // Directors link should be active
+  expect(directorsLink).toHaveClass('active');
+  // Other links should not be active
+  expect(homeLink).not.toHaveClass('active');
 });
