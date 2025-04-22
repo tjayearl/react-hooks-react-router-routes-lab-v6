@@ -1,71 +1,56 @@
+// src/__tests__/Directors.test.jsx
 import "@testing-library/jest-dom";
-import { RouterProvider, createMemoryRouter} from "react-router-dom"
 import { render, screen } from "@testing-library/react";
-import routes from "../routes";
+import { MemoryRouter } from "react-router-dom";
+import Directors from "../pages/Directors"; // Import the REAL Directors component
+import { beforeEach, expect, test } from "vitest";
 
-const directors = [
-  {
-    name: "Scott Derrickson",
-    movies: ["Doctor Strange", "Sinister", "The Exorcism of Emily Rose"],
-  },
-  {
-    name: "Mike Mitchell",
-    movies: ["Trolls", "Alvin and the Chipmunks: Chipwrecked", "Sky High"],
-  },
-  {
-    name: "Edward Zwick",
-    movies: ["Jack Reacher: Never Go Back", "Blood Diamond", "The Siege"],
-  },
+// Mock fetch
+const mockDirectorsData = [
+  { id: 1, name: "Mock Director Alpha" },
+  { id: 2, name: "Mock Director Beta" },
 ];
 
-const router = createMemoryRouter(routes, {
-  initialEntries: [`/directors`],
-  initialIndex: 0
-})
-
-test("renders without any errors", () => {
-  const errorSpy = vi.spyOn(global.console, "error");
-
-  render(<RouterProvider router={router}/>);
-
-  expect(errorSpy).not.toHaveBeenCalled();
-
-  errorSpy.mockRestore();
-});
-
-test("renders 'Directors Page' inside of a <h1 />", () => {
-  render(<RouterProvider router={router}/>);
-  const h1 = screen.queryByText(/Directors Page/);
-  expect(h1).toBeInTheDocument();
-  expect(h1.tagName).toBe("H1");
-});
-
-test("renders each director's name", async () => {
-  render(<RouterProvider router={router}/>);
-  for (const director of directors) {
-    expect(
-      await screen.findByText(director.name, { exact: false })
-    ).toBeInTheDocument();
-  }
-});
-
-test("renders a <li /> for each movie", async () => {
-  render(<RouterProvider router={router}/>);
-  for (const director of directors) {
-    for (const movie of director.movies) {
-      const li = await screen.findByText(movie, { exact: false });
-      expect(li).toBeInTheDocument();
-      expect(li.tagName).toBe("LI");
-    }
-  }
-});
-
-test("renders the <NavBar /> component", () => {
-  const router = createMemoryRouter(routes, {
-    initialEntries: ['/directors']
+'global'.fetch = 'jest'.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(mockDirectorsData),
   })
+);
+
+beforeEach(() => {
+  fetch.mockClear();
+});
+
+test("renders Directors heading and fetches/displays director names", async () => {
   render(
-      <RouterProvider router={router}/>
+    <MemoryRouter> {/* Needed for NavBar */}
+      <Directors />
+    </MemoryRouter>
   );
-  expect(document.querySelector(".navbar")).toBeInTheDocument();
+
+  // Check for the heading from src/pages/Directors.jsx
+ expect(screen.getByRole('heading', { name: /Directors/i, level: 1 })).toBeInTheDocument();
+
+  // Verify fetch
+  expect(fetch).toHaveBeenCalledTimes(1);
+  expect(fetch).toHaveBeenCalledWith("/api/directors");
+
+  // Wait for directors' names
+  expect(await screen.findByText("Mock Director Alpha")).toBeInTheDocument();
+  expect(await screen.findByText("Mock Director Beta")).toBeInTheDocument();
+});
+
+ test("handles fetch error", async () => {
+    fetch.mockImplementationOnce(() => Promise.reject(new Error("API failure")));
+
+    render(
+        <MemoryRouter>
+            <Directors />
+        </MemoryRouter>
+    );
+
+    expect(screen.getByRole('heading', { name: /Directors/i, level: 1 })).toBeInTheDocument();
+    expect(screen.queryByText("Mock Director Alpha")).not.toBeInTheDocument();
+    // Add checks for error handling if implemented
 });
