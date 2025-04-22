@@ -3,10 +3,11 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import routes from "../routes"; // Import the actual routes
+import { beforeEach, describe, expect, test } from "vitest";
 
 // Mock fetch globally for all tests in this file if components fetch on render
 // Adjust mock data as needed for specific route tests if necessary
-global.fetch = jest.fn(() =>
+'global'.fetch = 'jest'.fn(() =>
   Promise.resolve({
     ok: true, // Ensure ok is true for successful responses
     json: () => Promise.resolve([]), // Default empty array for list pages

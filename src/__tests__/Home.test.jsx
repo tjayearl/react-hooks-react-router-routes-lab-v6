@@ -3,6 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Home from "../pages/Home"; // Import the REAL Home component from pages
+import { expect, test } from "vitest";
 
 test("renders the Home component correctly", () => {
   render(

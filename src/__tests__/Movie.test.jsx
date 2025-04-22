@@ -2,6 +2,7 @@ import "@testing-library/jest-dom";
 import { RouterProvider, createMemoryRouter} from "react-router-dom"
 import { render, screen } from "@testing-library/react";
 import routes from "../routes";
+import { expect, test } from "vitest";
 
 const id = 1
 const router = createMemoryRouter(routes, {
@@ -10,7 +11,7 @@ const router = createMemoryRouter(routes, {
 })
 
 test("renders without any errors", () => {
-  const errorSpy = vi.spyOn(global.console, "error");
+  const errorSpy = 'vi'.spyOn('global'.console, "error");
 
   render(<RouterProvider router={router}/>);
 
