@@ -1,16 +1,19 @@
-// src/routes.jsx
+
 import Home from "./pages/Home";
+import Movie from "./pages/Movie";
 import Actors from "./pages/Actors";
 import Directors from "./pages/Directors";
-import Movie from "./pages/Movie";
-import NotFound from "./pages/NotFound";
+import ErrorPage from "./pages/ErrorPage";
 
 const routes = [
   {
     path: "/",
     element: <Home />,
-    // You could add an errorElement here for route-level errors
-    // errorElement: <ErrorPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/movie/:id",
+    element: <Movie />,
   },
   {
     path: "/actors",
@@ -19,15 +22,6 @@ const routes = [
   {
     path: "/directors",
     element: <Directors />,
-  },
-  {
-    // Correct path for movie details
-    path: "/movies/:id",
-    element: <Movie />,
-  },
-  {
-    path: "*", // Catch-all for unmatched routes
-    element: <NotFound />,
   },
 ];
 
