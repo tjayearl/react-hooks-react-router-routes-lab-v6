@@ -1,4 +1,3 @@
-// src/pages/Actors.jsx
 import { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 
@@ -6,29 +5,25 @@ function Actors() {
   const [actors, setActors] = useState([]);
 
   useEffect(() => {
-    // Example fetch, you can replace with your own API
-    fetch("/api/actors")
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(data => setActors(data))
-      .catch(error => console.error("Failed to fetch actors:", error)); // Add error handling
+    fetch("http://localhost:4000/actors")
+      .then(r => r.json())
+      .then(setActors);
   }, []);
 
   return (
     <>
-      <header>
-        <NavBar />
-      </header>
-      <main>
-        <h1>Actors</h1>
-        {/* Render actor names */}
-        {actors.map((actor) => (
-          // Assuming API returns { id: ..., name: ... }
-          <p key={actor.id}>{actor.name}</p>
-        ))}
-      </main>
+      <NavBar />
+      <h1>Actors Page</h1>
+      {actors.map((actor, index) => (
+        <article key={index}>
+          <h2>{actor.name}</h2>
+          <ul>
+            {actor.movies.map((title, i) => (
+              <li key={i}>{title}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
     </>
   );
 }
