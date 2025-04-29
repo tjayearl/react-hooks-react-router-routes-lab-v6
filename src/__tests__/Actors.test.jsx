@@ -1,58 +1,79 @@
-// src/__tests__/Actors.test.jsx
-/* eslint-env jest */
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import Actors from "../pages/Actors";
-import { beforeEach, describe, expect, test } from "vitest";
+import { RouterProvider, createMemoryRouter} from "react-router-dom";
+import routes from "../routes";
 
-// No global.fetch = ... here
+const actors = [
+  {
+    name: "Benedict Cumberbatch",
+    movies: ["Doctor Strange", "The Imitation Game", "Black Mass"],
+  },
+  {
+    name: "Justin Timberlake",
+    movies: ["Trolls", "Friends with Benefits", "The Social Network"],
+  },
+  {
+    name: "Anna Kendrick",
+    movies: ["Pitch Perfect", "Into The Wood"],
+  },
+  {
+    name: "Tom Cruise",
+    movies: [
+      "Jack Reacher: Never Go Back",
+      "Mission Impossible 4",
+      "War of the Worlds",
+    ],
+  },
+];
 
-describe("Actors Component Tests", () => { // Wrap in describe 
-  const mockActorsData = [
-    { id: 1, name: "Mock Actor One" },
-    { id: 2, name: "Mock Actor Two" },
-  ];
+const router = createMemoryRouter(routes, {
+  initialEntries: [`/actors`],
+  initialIndex: 0
+})
 
-  beforeEach(() => {
-    // Restore mocks before each test in this suite
-    'jest'.restoreAllMocks();
-  });
+test("renders without any errors", () => {
+  const errorSpy = vi.spyOn(global.console, "error");
 
-  test("renders Actors heading and fetches/displays actor names", async () => {
-    // Mock fetch specifically for this test
-    'jest'.spyOn('global', 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockActorsData,
-    });
+  render(<RouterProvider router={router}/>);
 
-    render(
-      <MemoryRouter>
-        <Actors />
-      </MemoryRouter>
-    );
+  expect(errorSpy).not.toHaveBeenCalled();
 
-    expect(screen.getByRole('heading', { name: /Actors/i, level: 1 })).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith("/api/actors");
-    expect(await screen.findByText("Mock Actor One")).toBeInTheDocument();
-    expect(await screen.findByText("Mock Actor Two")).toBeInTheDocument();
-  });
+  errorSpy.mockRestore();
+});
 
-  test("handles fetch error", async () => {
-    // Mock fetch to reject for this test
-    'jest'.spyOn('global', 'fetch').mockRejectedValueOnce(new Error("API is down"));
+test("renders 'Actors Page' inside of the <h1 />", () => {
+  render(<RouterProvider router={router}/>);
+  const h1 = screen.queryByText(/Actors Page/);
+  expect(h1).toBeInTheDocument();
+  expect(h1.tagName).toBe("H1");
+});
 
-    render(
-      <MemoryRouter>
-        <Actors />
-      </MemoryRouter>
-    );
+test("renders each actor's name", async () => {
+  render(<RouterProvider router={router}/>);
+  for (const actor of actors) {
+    expect(
+      await screen.findByText(actor.name, { exact: false })
+    ).toBeInTheDocument();
+  }
+});
 
-    expect(screen.getByRole('heading', { name: /Actors/i, level: 1 })).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(1); // Still called once
-    expect(fetch).toHaveBeenCalledWith("/api/actors");
-    expect(screen.queryByText("Mock Actor One")).not.toBeInTheDocument();
-    // Add assertion for error display if Actors.jsx implements it
-  });
+test("renders a <li /> for each movie", async () => {
+  render(<RouterProvider router={router}/>);
+  for (const actor of actors) {
+    for (const movie of actor.movies) {
+      const li = await screen.findByText(movie, { exact: false });
+      expect(li).toBeInTheDocument();
+      expect(li.tagName).toBe("LI");
+    }
+  }
+});
+
+test("renders the <NavBar /> component", () => {
+  const router = createMemoryRouter(routes, {
+    initialEntries: ['/actors']
+  })
+  render(
+      <RouterProvider router={router}/>
+  );
+  expect(document.querySelector(".navbar")).toBeInTheDocument();
 });
