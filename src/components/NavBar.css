@@ -1,19 +1,19 @@
-/* src/components/NavBar.css */
-.navbar > a {
-    display: inline-block;
-    box-sizing: border-box;
-    width: 70px;
-    padding: 5px;
-    margin: 0 6px 6px;
-    background: lightblue;
-    text-decoration: none;
-    text-align: center;
-    font-size: min(10vw, 15px);
-    color: black;
+.navbar {
+    background-color: #333;
+    padding: 1rem;
   }
   
-  a.active {
-    background: black;
+  .navbar a {
     color: white;
+    margin-right: 1rem;
+    text-decoration: none;
   }
   
+  .navbar a:hover {
+    text-decoration: underline;
+  }
+  
+  .navbar a.active {
+    font-weight: bold;
+    text-decoration: underline;
+  }  
